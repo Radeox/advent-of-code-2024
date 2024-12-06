@@ -2,7 +2,7 @@ def solution():
     solution = 0
     map = []
 
-    with open("example.txt") as f:
+    with open("input.txt") as f:
         lines = f.readlines()
 
     # Create matrix map
@@ -19,53 +19,53 @@ def solution():
     while True:
         # Get next position
         if direction == "up":
-            i = x
-            j = y + 1
+            x = x - 1
+            map[x][y] = "X"
+
+            if x <= 0:
+                break
+            else:
+                next = map[x - 1][y]
         elif direction == "right":
-            i = x + 1
-            j = y
+            y = y + 1
+            map[x][y] = "X"
+
+            if y >= len(map) - 1:
+                break
+            else:
+                next = map[x][y + 1]
         elif direction == "down":
-            i = x
-            j = y - 1
+            x = x + 1
+            map[x][y] = "X"
+
+            if x >= len(map[0]) - 1:
+                break
+            else:
+                next = map[x + 1][y]
+
         elif direction == "left":
-            i = x - 1
-            j = y
+            y = y - 1
+            map[x][y] = "X"
+
+            if y <= 0:
+                break
+            else:
+                next = map[x][y - 1]
         else:
-            i = x
-            j = y
-
-        next = map[i][j]
-
-        # If out of bounds, break
-        if i < 0 or i > len(map) - 1 or j < 0 or j > len(map[x]) - 1:
             break
-        print(f"Position: {x}, {y}")
 
         # Change direction at any obstacle
         if next == "#":
             i = directions.index(direction)
             direction = directions[(i + 1) % 4]
         else:
-            if direction == "up":
-                x -= 1
-                map[x][y] = "X"
-            elif direction == "right":
-                y += 1
-                map[x][y] = "X"
-            elif direction == "down":
-                x += 1
-                map[x][y] = "X"
-            elif direction == "left":
-                y -= 1
-                map[x][y] = "X"
+            map[x][y] = "X"
 
     # Count X on the map
     for x in range(len(map)):
         for y in range(len(map[x])):
-            print(map[x][y], end="")
             if map[x][y] == "X":
                 solution += 1
-        print()
 
     return solution
 
