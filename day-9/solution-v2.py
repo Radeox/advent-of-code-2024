@@ -2,12 +2,14 @@ def solution():
     solution = 0
     disk = []
 
-    with open("example.txt") as f:
+    with open("input.txt") as f:
         disk_map = f.readline().strip()
 
     id = 0
     checking_free = False
     disk_usage = {}
+    disk_order = []
+    disk_position = {}
 
     # Recosturct the disk
     for bit in disk_map:
@@ -17,6 +19,8 @@ def solution():
 
             # Keep track of each file size
             disk_usage[id] = int(bit)
+            disk_order.append(id)
+            disk_position[id] = len(disk) - int(bit)
 
             checking_free = True
             id += 1
@@ -25,56 +29,44 @@ def solution():
                 disk.append(".")
             checking_free = False
 
-    for i in range(len(disk)):
-        print(disk[i], end="")
-    print()
-
     # Compact disk from right to left (prevent fragmentation)
-    for i in range(len(disk)):
-        # Skip
-        if disk[i] != ".":
-            continue
-        else:
-            index = i
-            free_space = 0
-            for i in range(i, len(disk)):
-                if disk[i] == ".":
-                    free_space += 1
-                else:
+    disk_order.reverse()
+    for file in disk_order:
+        space_needed = disk_usage[file]
+
+        for i in range(len(disk)):
+            if disk[i] == ".":
+                free_space = 0
+                # Check how much free space is available
+                for j in range(i, len(disk)):
+                    if disk[j] == ".":
+                        free_space += 1
+                    else:
+                        break
+
+                # Find file in disk
+                p = disk_position[file]
+
+                if i > p:
                     break
 
-            # Search for biggest file that can fit in the free space
-            to_move = -1
-            for file in range(len(disk_usage) - 1, -1, -1):
-                if disk_usage[file] <= free_space:
-                    to_move = file
+                # Check if we have enough space to move the file
+                if free_space >= space_needed:
+                    # Move the file
+                    for k in range(len(disk)):
+                        if disk[k] == file:
+                            disk[k] = "."
+
+                    for j in range(i, i + space_needed):
+                        disk[j] = file
                     break
-
-            for j in range(len(disk) - 1, index, -1):
-                if disk[j] == to_move:
-                    disk[index] = to_move
-                    disk[j] = "."
-                    free_space -= 1
-                    break
-
-            # for j in range(len(disk) - 1, index, -1):
-            #     if disk[j] != ".":
-            #         if disk_usage[disk[j]] <= free_space:
-            #             disk[index] = disk[j]
-            #             disk[j] = "."
-            #             free_space -= disk_usage[disk[index]]
-            #             break
-
-    for i in range(len(disk)):
-        print(disk[i], end="")
-    print()
 
     # Compute checksum
-    id = 0
+    pos = 0
     for i in range(len(disk) - 1):
         if disk[i] != ".":
-            solution += id * int(disk[i])
-            id += 1
+            solution += pos * int(disk[i])
+        pos += 1
 
     return solution
 
