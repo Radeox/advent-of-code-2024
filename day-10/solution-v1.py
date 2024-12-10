@@ -1,10 +1,8 @@
 def solution():
     solution = 0
-    input = []
     map = []
-    scores = {}
 
-    with open("example.txt") as f:
+    with open("input.txt") as f:
         input = f.readlines()
 
     # Clean up
@@ -19,49 +17,52 @@ def solution():
                 start_points.append((x, y))
 
     for sp in start_points:
-        path = look_for_trails(map, sp[0], sp[1], 0)
-        print(path)
-        step = 0
+        unique_points = []
+        points = flatten_list(look_for_trails(map, sp[0], sp[1]))
 
-        for x in range(len(map)):
-            for y in range(len(map[x])):
-                if (x, y) in path and map[x][y] > step:
-                    step = map[x][y]
+        # Remove duplicates
+        for p in points:
+            if p not in unique_points and p is not None:
+                unique_points.append(p)
 
-        if step == 9:
-            if sp in scores:
-                scores[sp] += 1
-            else:
-                scores[sp] = 1
-
-    print(scores)
+        solution += len(unique_points)
 
     return solution
 
 
-def look_for_trails(map, x, y, value):
-    paths = []
+def look_for_trails(map, x, y):
+    def dfs(map, x, y, prev_value):
+        if (
+            not (0 <= x < len(map) and 0 <= y < len(map[0]))
+            or map[x][y] != prev_value + 1
+        ):
+            return
 
-    if value == 9:
-        return paths
+        if map[x][y] == 9:
+            return (x, y)
 
-    # Left
-    if x > 0 and map[x - 1][y] == value + 1:
-        paths.append(look_for_trails(map, x - 1, y, value + 1))
+        current_value = map[x][y]
+        return [
+            position
+            for position in [
+                dfs(map, x + 1, y, current_value),
+                dfs(map, x - 1, y, current_value),
+                dfs(map, x, y + 1, current_value),
+                dfs(map, x, y - 1, current_value),
+            ]
+        ]
 
-    # Up
-    if y > 0 and map[x][y - 1] == value + 1:
-        paths.append(look_for_trails(map, x, y - 1, value + 1))
+    return dfs(map, x, y, -1)
 
-    # Right
-    if x < len(map[0]) - 1 and map[x + 1][y] == value + 1:
-        paths.append(look_for_trails(map, x + 1, y, value + 1))
 
-    # Down
-    if y < len(map) - 1 and map[x][y + 1] == value + 1:
-        paths.append(look_for_trails(map, x, y + 1, value + 1))
-
-    return (x, y)
+def flatten_list(nested_list):
+    flattened = []
+    for element in nested_list:
+        if isinstance(element, list):
+            flattened.extend(flatten_list(element))
+        else:
+            flattened.append(element)
+    return flattened
 
 
 if __name__ == "__main__":
