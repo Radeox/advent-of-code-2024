@@ -4,7 +4,7 @@ def solution():
     plots = []
     memory = []
 
-    with open("example.txt") as f:
+    with open("input.txt") as f:
         for line in f:
             garden.append(list(line.strip()))
 
@@ -27,111 +27,61 @@ def solution():
                 memory.append(plant)
 
     # Compute area and perimeter of each plot
-    for i, plot in enumerate(plots):
+    for plot in plots:
         plant = garden[plot[0][0]][plot[0][1]]
 
         # Compute area
         area = len(plot)
-
-        # Compute perimeter
         perimeter = 0
 
-        x_walls = set()
-        y_walls = set()
+        for p in plot:
+            x, y = p
 
-        for x, y in plot:
-            if (
-                x < len(garden) - 1
-                and x + 1 not in x_walls
-                and garden[x + 1][y] != plant
-            ):
-                x_walls.add(x + 1)
+            tl = (x - 1, y - 1)
+            tr = (x - 1, y + 1)
+            bl = (x + 1, y - 1)
+            br = (x + 1, y + 1)
 
-            if x > 0 and x - 1 not in x_walls and garden[x - 1][y] != plant:
-                x_walls.add(x - 1)
+            left = (x, y - 1)
+            right = (x, y + 1)
+            top = (x - 1, y)
+            bottom = (x + 1, y)
 
-            if (
-                y < len(garden[0]) - 1
-                and y + 1 not in y_walls
-                and garden[x][y + 1] != plant
-            ):
-                y_walls.add(y + 1)
+            # Outer corners
+            ## Top left
+            if top not in plot and left not in plot:
+                perimeter += 1
 
-            if y > 0 and y - 1 not in y_walls and garden[x][y - 1] != plant:
-                y_walls.add(y - 1)
+            ## Top right
+            if top not in plot and right not in plot:
+                perimeter += 1
 
-            if x in x_walls and not y in y_walls:
-                perimeter -= 1
+            ## Bottom left
+            if bottom not in plot and left not in plot:
+                perimeter += 1
 
-            elif y in y_walls and x not in x_walls:
-                perimeter -= 1
+            ## Bottom right
+            if bottom not in plot and right not in plot:
+                perimeter += 1
 
-            else:
-                perimeter += 3
+            # Inner corners
+            ## Top left
+            if top in plot and left in plot and tl not in plot:
+                perimeter += 1
 
-        print(f"X Walls: {x_walls}")
-        print(f"Y Walls: {y_walls}")
+            ## Top right
+            if top in plot and right in plot and tr not in plot:
+                perimeter += 1
 
-        # v_walls = set()
-        # h_walls = set()
-        #
-        # for x, y in plot:
-        #     print(f"Plot {plant}: {x},{y}")
-        #     # Up
-        #     if x > 0 and garden[x - 1][y] != plant and x - 1 not in v_walls:
-        #         perimeter += 1
-        #         v_walls.add(x - 1)
-        #
-        #     # Down
-        #     if (
-        #         x < len(garden) - 1
-        #         and garden[x + 1][y] != plant
-        #         and x + 1 not in v_walls
-        #     ):
-        #         perimeter += 1
-        #         v_walls.add(x + 1)
-        #
-        #     # Left
-        #     if y > 0 and garden[x][y - 1] != plant and y - 1 not in h_walls:
-        #         perimeter += 1
-        #         h_walls.add(y - 1)
-        #
-        #     # Right
-        #     if (
-        #         y < len(garden[x]) - 1
-        #         and garden[x][y + 1] != plant
-        #         and y + 1 not in h_walls
-        #     ):
-        #         perimeter += 1
-        #         h_walls.add(y + 1)
-        #
-        #     # Edges
-        #     if x == 0 or x == len(garden) - 1 and x not in v_walls:
-        #         perimeter += 1
-        #         v_walls.add(x)
-        #
-        #     if y == 0 or y == len(garden[x]) - 1 and y not in h_walls:
-        #         perimeter += 1
-        #         h_walls.add(y)
-        #
-        # print(f"Horizontal: {h_walls}")
-        # print(f"Vertical: {v_walls}")
+            ## Bottom left
+            if bottom in plot and left in plot and bl not in plot:
+                perimeter += 1
 
-        # Discounts
-        # if x > 0 and garden[x - 1][y] == plant:
-        #     perimeter -= 1
-        #
-        # if x < len(garden) - 1 and garden[x + 1][y] == plant:
-        #     perimeter -= 1
-        #
-        # if y > 0 and garden[x][y - 1] == plant:
-        #     perimeter -= 1
-        #
-        # if y < len(garden[x]) - 1 and garden[x][y + 1] == plant:
-        #     perimeter -= 1
+            ## Bottom right
+            if bottom in plot and right in plot and br not in plot:
+                perimeter += 1
 
         # Compute plot cost
-        print(f"Plot {plant}: A:{area} P:{perimeter}")
         cost = area * perimeter
         solution += cost
 
