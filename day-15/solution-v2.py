@@ -1,9 +1,12 @@
+import os
+
+
 def solution():
     map = []
     moves = []
     robot = tuple([0, 0])
 
-    with open("example2.txt") as f:
+    with open("input.txt") as f:
         map_complete = False
 
         for line in f:
@@ -24,6 +27,11 @@ def solution():
             else:
                 moves.append(list(line))
 
+    for x in range(len(map)):
+        for y in range(len(map[0])):
+            print(map[x][y], end="")
+        print()
+
     # Collapse moves to single list
     moves = [move for sublist in moves for move in sublist]
 
@@ -35,14 +43,35 @@ def solution():
                 break
 
     # Move robot
-    for move in moves:
-        print(f"--- Move: {move} ---")
+    for c, move in enumerate(moves):
+        # Make copy of map and robot position
+        revert_map = [row[:] for row in map]
+        robot_before = robot
+
+        # Make the move
+        robot = do_move(map, robot[0], robot[1], move)
+
+        # Search for broken boxes
+        for x in range(len(map)):
+            for y in range(len(map[0])):
+                if map[x][y] == "[":
+                    if map[x][y + 1] != "]":
+                        # Revert map and robot position
+                        robot = robot_before
+
+                        for x in range(len(map)):
+                            for y in range(len(map[0])):
+                                map[x][y] = revert_map[x][y]
+
+                        break
+
+        os.system("clear")
+        print(f"--- Move: {move} ({c}/{len(moves)})---")
         for x in range(len(map)):
             for y in range(len(map[0])):
                 print(map[x][y], end="")
             print()
-
-        robot = do_move(map, robot[0], robot[1], move)
+        input()
 
     # Compute solution
     solution = 0
@@ -73,24 +102,22 @@ def do_move(map, x, y, next_move):
             dx = 0
             dy += 1
 
+    # If moving a box
     if map[x + dx][y + dy] not in ["#", "."]:
-        do_move(map, x + dx, y + dy, next_move)
+        if map[x + dx][y + dy] == "[" and next_move in ["^", "v"]:
+            do_move(map, x + dx, y + dy + 1, next_move)
+            do_move(map, x + dx, y + dy, next_move)
+        elif map[x + dx][y + dy] == "]" and next_move in ["^", "v"]:
+            do_move(map, x + dx, y + dy, next_move)
+            do_move(map, x + dx, y + dy - 1, next_move)
+        else:
+            do_move(map, x + dx, y + dy, next_move)
 
     if map[x + dx][y + dy] != ".":
         return (x, y)
     else:
-        if map[x + dx][y + dy] == "[":
-            map[x + dx][y + dy] = map[x][y]
-            map[x][y] = "."
-
-            map[x + dx][y + dy + 1] = map[x][y + 1]
-            map[x][y + 1] = "."
-        else:
-            map[x + dx][y + dy] = map[x][y]
-            map[x][y] = "."
-
-            map[x + dx][y + dy - 1] = map[x][y - 1]
-            map[x][y - 1] = "."
+        map[x + dx][y + dy] = map[x][y]
+        map[x][y] = "."
 
         return (x + dx, y + dy)
 
